@@ -1,596 +1,317 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import './CourseDetails.css';
+// CourseDetails.js - With external resource links and separate checkboxes
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
+import { 
+  enrollInCourse, 
+  isEnrolledInCourse, 
+  getCourseProgress,
+  updateLessonCompletion 
+} from "./firestoreUtils";
+import "./CourseDetails.css";
 
 const CourseDetails = () => {
   const { id } = useParams();
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [activeModule, setActiveModule] = useState(0);
-  const [selectedCourse, setSelectedCourse] = useState(parseInt(id) || 1);
-  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [enrolled, setEnrolled] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
 
-  // Real course data from actual online platforms
-  const realCourses = {
-    1: {
+  // All courses data with resource links
+  const allCourses = [
+    {
       id: 1,
       title: "HTML, CSS & JavaScript Complete Course",
       category: "Web Development",
-      image:
-        "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&h=400&fit=crop",
+      image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&h=400&fit=crop",
       platform: "W3Schools + Mozilla MDN + FreeCodeCamp",
       duration: "Self-paced",
       level: "Beginner to Advanced",
-      description:
-        "Complete web development course combining resources from W3Schools tutorials, Mozilla MDN documentation, and FreeCodeCamp interactive lessons. Learn from the most trusted web development resources.",
-      modules: [
-        {
-          title: "HTML5 Fundamentals (W3Schools)",
-          platform: "W3Schools",
-          url: "https://www.w3schools.com/html/",
-          lessons: [
-            {
-              name: "HTML Introduction",
-              url: "https://www.w3schools.com/html/html_intro.asp",
-            },
-            {
-              name: "HTML Elements",
-              url: "https://www.w3schools.com/html/html_elements.asp",
-            },
-            {
-              name: "HTML Attributes",
-              url: "https://www.w3schools.com/html/html_attributes.asp",
-            },
-            {
-              name: "HTML Forms",
-              url: "https://www.w3schools.com/html/html_forms.asp",
-            },
-            {
-              name: "HTML5 Semantic Elements",
-              url: "https://www.w3schools.com/html/html5_semantic_elements.asp",
-            },
-          ],
-        },
-        {
-          title: "CSS3 Styling (W3Schools + CSS-Tricks)",
-          platform: "W3Schools + CSS-Tricks",
-          url: "https://www.w3schools.com/css/",
-          lessons: [
-            {
-              name: "CSS Flexbox Guide",
-              url: "https://css-tricks.com/snippets/css/a-guide-to-flexbox/",
-            },
-            {
-              name: "CSS Grid Guide",
-              url: "https://css-tricks.com/snippets/css/complete-guide-grid/",
-            },
-            {
-              name: "CSS Selectors",
-              url: "https://www.w3schools.com/css/css_selectors.asp",
-            },
-            {
-              name: "CSS Responsive",
-              url: "https://www.w3schools.com/css/css_rwd_intro.asp",
-            },
-          ],
-        },
-        {
-          title: "JavaScript Programming (Mozilla MDN)",
-          platform: "Mozilla MDN",
-          url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
-          lessons: [
-            {
-              name: "JavaScript Guide",
-              url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
-            },
-            {
-              name: "Functions",
-              url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions",
-            },
-            {
-              name: "Promises",
-              url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises",
-            },
-            {
-              name: "DOM API",
-              url: "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model",
-            },
-          ],
-        },
-        {
-          title: "Interactive Exercises (FreeCodeCamp)",
-          platform: "FreeCodeCamp",
-          url: "https://www.freecodecamp.org/learn/2022/responsive-web-design/",
-          lessons: [
-            {
-              name: "Responsive Web Design",
-              url: "https://www.freecodecamp.org/learn/2022/responsive-web-design/",
-            },
-            {
-              name: "JavaScript Algorithms",
-              url: "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/",
-            },
-          ],
-        },
-      ],
-      practiceResources: [
-        {
-          name: "Codepen.io",
-          description: "Online code editor",
-          url: "https://codepen.io/",
-        },
-        {
-          name: "JSFiddle",
-          description: "Test JavaScript online",
-          url: "https://jsfiddle.net/",
-        },
+      description: "Master the fundamentals of web development with HTML, CSS, and JavaScript. This comprehensive course covers everything from basic syntax to advanced concepts.",
+      lessons: [
+        { id: 1, title: "Introduction to HTML", duration: "30 mins", link: "https://www.w3schools.com/html/html_intro.asp" },
+        { id: 2, title: "HTML Elements and Attributes", duration: "45 mins", link: "https://www.w3schools.com/html/html_elements.asp" },
+        { id: 3, title: "CSS Basics and Styling", duration: "60 mins", link: "https://www.w3schools.com/css/css_intro.asp" },
+        { id: 4, title: "CSS Flexbox and Grid", duration: "50 mins", link: "https://www.w3schools.com/css/css3_flexbox.asp" },
+        { id: 5, title: "JavaScript Fundamentals", duration: "70 mins", link: "https://www.w3schools.com/js/js_intro.asp" },
+        { id: 6, title: "DOM Manipulation", duration: "55 mins", link: "https://www.w3schools.com/js/js_htmldom.asp" },
+        { id: 7, title: "Events and Event Handling", duration: "40 mins", link: "https://www.w3schools.com/js/js_events.asp" },
+        { id: 8, title: "JavaScript ES6+ Features", duration: "65 mins", link: "https://www.w3schools.com/js/js_es6.asp" },
+        { id: 9, title: "Async JavaScript", duration: "60 mins", link: "https://www.w3schools.com/js/js_async.asp" },
+        { id: 10, title: "Final Project", duration: "120 mins", link: "https://www.w3schools.com/js/js_examples.asp" },
       ],
     },
-    2: {
+    {
       id: 2,
       title: "Python for Everybody Specialization",
       category: "Programming",
-      image:
-        "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&h=400&fit=crop",
+      image: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&h=400&fit=crop",
       platform: "GeeksforGeeks + Python.org + Real Python",
       duration: "Self-paced",
       level: "Beginner to Intermediate",
-      description:
-        "Comprehensive Python course using official Python documentation, GeeksforGeeks tutorials, and Real Python articles.",
-      modules: [
-        {
-          title: "Python Basics (Python.org)",
-          platform: "Python.org",
-          url: "https://docs.python.org/3/tutorial/",
-          lessons: [
-            {
-              name: "Python Tutorial",
-              url: "https://docs.python.org/3/tutorial/",
-            },
-            {
-              name: "Control Flow Tools",
-              url: "https://docs.python.org/3/tutorial/controlflow.html",
-            },
-            {
-              name: "Data Structures",
-              url: "https://docs.python.org/3/tutorial/datastructures.html",
-            },
-          ],
-        },
-        {
-          title: "Python Data Structures (GeeksforGeeks)",
-          platform: "GeeksforGeeks",
-          url: "https://www.geeksforgeeks.org/python-data-structures/",
-          lessons: [
-            {
-              name: "Python Lists",
-              url: "https://www.geeksforgeeks.org/python-list/",
-            },
-            {
-              name: "Python Dictionary",
-              url: "https://www.geeksforgeeks.org/python-dictionary/",
-            },
-            {
-              name: "Python Sets",
-              url: "https://www.geeksforgeeks.org/python-sets/",
-            },
-          ],
-        },
-      ],
-      practiceResources: [
-        {
-          name: "LeetCode Python",
-          description: "Coding problems",
-          url: "https://leetcode.com/problemset/all/",
-        },
-        {
-          name: "HackerRank Python",
-          description: "Python challenges",
-          url: "https://www.hackerrank.com/domains/python",
-        },
+      description: "Learn Python programming from scratch. Perfect for beginners who want to start their programming journey.",
+      lessons: [
+        { id: 1, title: "Python Installation and Setup", duration: "20 mins", link: "https://www.python.org/downloads/" },
+        { id: 2, title: "Variables and Data Types", duration: "40 mins", link: "https://www.w3schools.com/python/python_variables.asp" },
+        { id: 3, title: "Control Flow and Loops", duration: "50 mins", link: "https://www.w3schools.com/python/python_conditions.asp" },
+        { id: 4, title: "Functions and Modules", duration: "60 mins", link: "https://www.w3schools.com/python/python_functions.asp" },
+        { id: 5, title: "Data Structures", duration: "70 mins", link: "https://www.w3schools.com/python/python_lists.asp" },
+        { id: 6, title: "File Handling", duration: "45 mins", link: "https://www.w3schools.com/python/python_file_handling.asp" },
+        { id: 7, title: "Object-Oriented Programming", duration: "80 mins", link: "https://www.w3schools.com/python/python_classes.asp" },
+        { id: 8, title: "Error Handling", duration: "35 mins", link: "https://www.w3schools.com/python/python_try_except.asp" },
       ],
     },
-    3: {
+    {
       id: 3,
       title: "Computer Networks & Protocols",
       category: "Computer Networking",
-      image:
-        "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=400&fit=crop",
+      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=400&fit=crop",
       platform: "Cisco Networking Academy + GeeksforGeeks",
       duration: "10 weeks",
       level: "Intermediate",
-      description:
-        "Comprehensive computer networking course covering TCP/IP, OSI model, routing protocols, and network security fundamentals.",
-      modules: [
-        {
-          title: "Network Fundamentals",
-          platform: "GeeksforGeeks + Cisco",
-          url: "https://www.geeksforgeeks.org/computer-network-tutorials/",
-          lessons: [
-            {
-              name: "OSI Model",
-              url: "https://www.geeksforgeeks.org/layers-of-osi-model/",
-            },
-            {
-              name: "TCP/IP Protocol Suite",
-              url: "https://www.geeksforgeeks.org/tcp-ip-model/",
-            },
-            {
-              name: "Network Topologies",
-              url: "https://www.geeksforgeeks.org/types-of-network-topology/",
-            },
-            {
-              name: "IP Addressing",
-              url: "https://www.geeksforgeeks.org/ip-addressing-introduction-and-classful-addressing/",
-            },
-          ],
-        },
-        {
-          title: "Routing and Switching",
-          platform: "Cisco Networking Academy",
-          url: "https://www.netacad.com/courses/networking",
-          lessons: [
-            {
-              name: "Static Routing",
-              url: "https://www.geeksforgeeks.org/static-routing/",
-            },
-            {
-              name: "Dynamic Routing Protocols",
-              url: "https://www.geeksforgeeks.org/dynamic-routing/",
-            },
-            {
-              name: "VLAN Configuration",
-              url: "https://www.geeksforgeeks.org/virtual-lan-vlan/",
-            },
-            {
-              name: "Spanning Tree Protocol",
-              url: "https://www.geeksforgeeks.org/spanning-tree-protocol-stp/",
-            },
-          ],
-        },
-        {
-          title: "Network Security",
-          platform: "GeeksforGeeks",
-          url: "https://www.geeksforgeeks.org/network-security/",
-          lessons: [
-            {
-              name: "Firewalls",
-              url: "https://www.geeksforgeeks.org/introduction-of-firewall-in-computer-network/",
-            },
-            {
-              name: "VPN Technology",
-              url: "https://www.geeksforgeeks.org/virtual-private-network-vpn-introduction/",
-            },
-            {
-              name: "Network Attacks",
-              url: "https://www.geeksforgeeks.org/types-of-network-attacks/",
-            },
-            {
-              name: "Cryptography Basics",
-              url: "https://www.geeksforgeeks.org/cryptography-introduction/",
-            },
-          ],
-        },
-        {
-          title: "Wireless Networks",
-          platform: "IEEE Standards + GeeksforGeeks",
-          url: "https://www.geeksforgeeks.org/wireless-communication/",
-          lessons: [
-            {
-              name: "WiFi Standards",
-              url: "https://www.geeksforgeeks.org/wifi-standards/",
-            },
-            {
-              name: "Bluetooth Technology",
-              url: "https://www.geeksforgeeks.org/bluetooth/",
-            },
-            {
-              name: "Cellular Networks",
-              url: "https://www.geeksforgeeks.org/cellular-network/",
-            },
-          ],
-        },
-      ],
-      practiceResources: [
-        {
-          name: "Packet Tracer",
-          description: "Cisco network simulator",
-          url: "https://www.netacad.com/courses/packet-tracer",
-        },
-        {
-          name: "GNS3",
-          description: "Network emulation software",
-          url: "https://www.gns3.com/",
-        },
-        {
-          name: "Wireshark",
-          description: "Network protocol analyzer",
-          url: "https://www.wireshark.org/",
-        },
+      description: "Deep dive into computer networking, protocols, and network architecture.",
+      lessons: [
+        { id: 1, title: "Introduction to Networks", duration: "45 mins", link: "https://www.geeksforgeeks.org/basics-computer-networking/" },
+        { id: 2, title: "OSI Model", duration: "60 mins", link: "https://www.geeksforgeeks.org/layers-of-osi-model/" },
+        { id: 3, title: "TCP/IP Protocol Suite", duration: "70 mins", link: "https://www.geeksforgeeks.org/tcp-ip-model/" },
+        { id: 4, title: "IP Addressing", duration: "55 mins", link: "https://www.geeksforgeeks.org/introduction-of-classful-ip-addressing/" },
+        { id: 5, title: "Subnetting", duration: "65 mins", link: "https://www.geeksforgeeks.org/introduction-to-subnetting/" },
+        { id: 6, title: "Routing Protocols", duration: "75 mins", link: "https://www.geeksforgeeks.org/types-of-routing/" },
       ],
     },
-    4: {
+    {
       id: 4,
       title: "React JS Complete Tutorial",
       category: "Web Development",
-      image:
-        "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop",
+      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop",
       platform: "Official React Docs",
       duration: "Self-paced",
       level: "Intermediate",
-      description: "Learn React from the official documentation and tutorial.",
-      modules: [
-        {
-          title: "React Official Tutorial",
-          platform: "React.dev",
-          url: "https://react.dev/learn",
-          lessons: [
-            {
-              name: "Quick Start",
-              url: "https://react.dev/learn",
-            },
-            {
-              name: "Thinking in React",
-              url: "https://react.dev/learn/thinking-in-react",
-            },
-            {
-              name: "Your First Component",
-              url: "https://react.dev/learn/your-first-component",
-            },
-          ],
-        },
-      ],
-      practiceResources: [
-        {
-          name: "CodeSandbox",
-          description: "Online React environment",
-          url: "https://codesandbox.io/s/react",
-        },
-        {
-          name: "React DevTools",
-          description: "Browser extension",
-          url: "https://react.dev/learn/react-developer-tools",
-        },
+      description: "Build modern web applications with React. Learn components, hooks, state management, and more.",
+      lessons: [
+        { id: 1, title: "React Basics", duration: "40 mins", link: "https://react.dev/learn" },
+        { id: 2, title: "Components and Props", duration: "50 mins", link: "https://react.dev/learn/passing-props-to-a-component" },
+        { id: 3, title: "State and Lifecycle", duration: "60 mins", link: "https://react.dev/learn/state-a-components-memory" },
+        { id: 4, title: "React Hooks", duration: "70 mins", link: "https://react.dev/reference/react" },
+        { id: 5, title: "Context API", duration: "55 mins", link: "https://react.dev/learn/passing-data-deeply-with-context" },
+        { id: 6, title: "React Router", duration: "45 mins", link: "https://reactrouter.com/en/main" },
+        { id: 7, title: "Building a Full App", duration: "120 mins", link: "https://react.dev/learn/thinking-in-react" },
       ],
     },
-    5: {
+    {
       id: 5,
       title: "Machine Learning Course",
       category: "AI & Machine Learning",
-      image:
-        "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop",
+      image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop",
       platform: "Andrew Ng's ML Course + Kaggle Learn",
       duration: "11 weeks",
       level: "Intermediate",
-      description:
-        "Learn machine learning from Andrew Ng's Stanford course and Kaggle Learn modules.",
-      modules: [
-        {
-          title: "Machine Learning by Andrew Ng",
-          platform: "Coursera",
-          url: "https://www.coursera.org/learn/machine-learning",
-          lessons: [
-            {
-              name: "Introduction",
-              url: "https://www.coursera.org/learn/machine-learning",
-            },
-            {
-              name: "Linear Regression",
-              url: "https://www.coursera.org/learn/machine-learning",
-            },
-          ],
-        },
-      ],
-      practiceResources: [
-        {
-          name: "Kaggle Competitions",
-          description: "ML competitions",
-          url: "https://www.kaggle.com/competitions",
-        },
-        {
-          name: "Google Colab",
-          description: "Free Jupyter notebooks",
-          url: "https://colab.research.google.com/",
-        },
+      description: "Learn machine learning algorithms and build predictive models.",
+      lessons: [
+        { id: 1, title: "Introduction to ML", duration: "50 mins", link: "https://www.kaggle.com/learn/intro-to-machine-learning" },
+        { id: 2, title: "Linear Regression", duration: "65 mins", link: "https://www.kaggle.com/code/dansbecker/your-first-machine-learning-model" },
+        { id: 3, title: "Logistic Regression", duration: "60 mins", link: "https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression" },
+        { id: 4, title: "Neural Networks", duration: "90 mins", link: "https://www.kaggle.com/learn/intro-to-deep-learning" },
+        { id: 5, title: "Deep Learning", duration: "85 mins", link: "https://www.tensorflow.org/tutorials" },
+        { id: 6, title: "Model Evaluation", duration: "55 mins", link: "https://scikit-learn.org/stable/modules/model_evaluation.html" },
       ],
     },
-  };
+  ];
 
-  const currentCourse = realCourses[selectedCourse];
+  const course = allCourses.find((c) => c.id === parseInt(id));
 
   useEffect(() => {
-    setIsLoaded(true);
-    if (id) {
-      setSelectedCourse(parseInt(id));
+    const checkEnrollmentAndProgress = async () => {
+      if (!course) {
+        setLoading(false);
+        return;
+      }
+
+      if (user) {
+        try {
+          const isEnrolled = await isEnrolledInCourse(user.uid, id);
+          setEnrolled(isEnrolled);
+
+          if (isEnrolled) {
+            const courseProgress = await getCourseProgress(user.uid, id);
+            setProgress(courseProgress);
+          }
+        } catch (error) {
+          console.error("Error checking enrollment:", error);
+        }
+      }
+      setLoading(false);
+    };
+
+    checkEnrollmentAndProgress();
+  }, [user, id, course]);
+
+  const handleEnroll = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
     }
-  }, [id]);
 
-  const handleEnroll = () => {
-    setShowEnrollModal(true);
+    setEnrolling(true);
+    try {
+      await enrollInCourse(user.uid, id);
+      setEnrolled(true);
+      
+      const courseProgress = await getCourseProgress(user.uid, id);
+      setProgress(courseProgress);
+      
+      alert("Successfully enrolled in the course!");
+    } catch (error) {
+      console.error("Enrollment error:", error);
+      alert("Failed to enroll. Please try again.");
+    } finally {
+      setEnrolling(false);
+    }
   };
 
-  const handleExternalLink = (url) => {
-    window.open(url, "_blank");
+  const handleLessonClick = (lessonLink) => {
+    if (!enrolled) {
+      alert("Please enroll in the course first!");
+      return;
+    }
+    // Open lesson resource in new tab
+    window.open(lessonLink, '_blank');
   };
 
-  if (!currentCourse) {
-    return <div className="error-message">Course not found</div>;
+  const handleMarkComplete = async (e, lessonId) => {
+    e.stopPropagation(); // Prevent opening link when clicking checkbox
+    
+    if (!enrolled) {
+      alert("Please enroll in the course first!");
+      return;
+    }
+
+    try {
+      await updateLessonCompletion(
+        user.uid,
+        id,
+        lessonId,
+        course.lessons.length
+      );
+
+      // Refresh progress
+      const updatedProgress = await getCourseProgress(user.uid, id);
+      setProgress(updatedProgress);
+    } catch (error) {
+      console.error("Error updating lesson:", error);
+      alert("Failed to mark lesson as complete");
+    }
+  };
+
+  if (!course) {
+    return (
+      <div className="course-not-found">
+        <h2>Course not found</h2>
+        <button onClick={() => navigate("/courses")}>Back to Courses</button>
+      </div>
+    );
   }
 
+  const completedLessons = progress?.completedLessons || [];
+
   return (
-    <div className="course-details-container">
-      {/* Header */}
-      <header className="header">
-        <div className="header-content">
-          <div className="logo">MitrEdu</div>
-          <nav className="nav">
-            <ul className="nav-list">
-              <li>
-                <a href="/">Home</a>
-              </li>
-              <li>
-                <a href="/courses">Courses</a>
-              </li>
-              <li>
-                <a href="#dashboard">Dashboard</a>
-              </li>
-              <li>
-                <a href="#about">About</a>
-              </li>
-              <li>
-                <a href="#contact">Contact</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </header>
-
-      {/* Course Selector */}
-      <div className="course-selector">
-        <select
-          value={selectedCourse}
-          onChange={(e) => setSelectedCourse(parseInt(e.target.value))}
-          className="course-select"
-        >
-          <option value={1}>HTML, CSS & JavaScript Complete Course</option>
-          <option value={2}>Python for Everybody Specialization</option>
-          <option value={3}>Computer Networks & Protocols</option>
-          <option value={4}>React JS Complete Tutorial</option>
-          <option value={5}>Machine Learning Course</option>
-        </select>
-      </div>
-
+    <div className="course-details-page">
       {/* Course Header */}
-      <section className={`course-header ${isLoaded ? "loaded" : ""}`}>
-        <div className="course-info">
-          <h1 className="course-title">{currentCourse.title}</h1>
-          <div className="platform-badge">{currentCourse.platform}</div>
+      <section className="course-header">
+        <img src={course.image} alt={course.title} className="course-banner" />
+        <div className="course-header-content">
+          <span className="course-category">{course.category}</span>
+          <h1>{course.title}</h1>
+          <p className="course-description">{course.description}</p>
+          
           <div className="course-meta">
             <div className="meta-item">
-              <div className="meta-label">Duration</div>
-              <div className="meta-value">{currentCourse.duration}</div>
+              <strong>Platform:</strong> {course.platform}
             </div>
             <div className="meta-item">
-              <div className="meta-label">Level</div>
-              <div className="meta-value">{currentCourse.level}</div>
+              <strong>Duration:</strong> {course.duration}
             </div>
             <div className="meta-item">
-              <div className="meta-label">Category</div>
-              <div className="meta-value">{currentCourse.category}</div>
+              <strong>Level:</strong> {course.level}
+            </div>
+            <div className="meta-item">
+              <strong>Lessons:</strong> {course.lessons.length}
             </div>
           </div>
-          <p className="course-description">{currentCourse.description}</p>
-          <button className="enroll-button" onClick={handleEnroll}>
-            Access Course Resources
-          </button>
-        </div>
-        <div className="course-image-container">
-          <img
-            src={currentCourse.image}
-            alt={currentCourse.title}
-            className="course-image"
-          />
+
+          {enrolled ? (
+            <div className="enrollment-status">
+              <div className="enrolled-badge">✓ Enrolled</div>
+              <div className="progress-section">
+                <div className="progress-bar-large">
+                  <div
+                    className="progress-fill-large"
+                    style={{ width: `${progress?.percentComplete || 0}%` }}
+                  ></div>
+                </div>
+                <span className="progress-text-large">
+                  {progress?.percentComplete || 0}% Complete
+                </span>
+              </div>
+            </div>
+          ) : (
+            <button
+              className="enroll-btn"
+              onClick={handleEnroll}
+              disabled={enrolling}
+            >
+              {enrolling ? "Enrolling..." : "Enroll Now"}
+            </button>
+          )}
         </div>
       </section>
 
       {/* Course Content */}
       <section className="course-content">
-        {/* Modules Section */}
-        <div className="modules-section">
-          <h2 className="section-title">Course Modules & Resources</h2>
-          <div className="module-tabs">
-            {currentCourse.modules.map((module, index) => (
-              <button
-                key={index}
-                className={`module-tab ${activeModule === index ? "active" : ""}`}
-                onClick={() => setActiveModule(index)}
-              >
-                {module.title}
-              </button>
-            ))}
-          </div>
-          <div className="module-content">
-            <div className="module-header">
-              <h3 className="module-title">
-                {currentCourse.modules[activeModule].title}
-              </h3>
-              <a
-                href={currentCourse.modules[activeModule].url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="platform-link"
-              >
-                Visit {currentCourse.modules[activeModule].platform}
-              </a>
-            </div>
-            <div className="lessons-grid">
-              {currentCourse.modules[activeModule].lessons.map(
-                (lesson, index) => (
-                  <div
-                    key={index}
-                    className="lesson-card"
-                    onClick={() => handleExternalLink(lesson.url)}
-                  >
-                    <div className="lesson-name">{lesson.name}</div>
-                    <div className="lesson-url">{lesson.url}</div>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Practice Resources */}
-        <div className="resources-section">
-          <h2 className="section-title">Practice & Additional Resources</h2>
-          <div className="resources-grid">
-            {currentCourse.practiceResources.map((resource, index) => (
+        <h2>Course Curriculum</h2>
+        <div className="lessons-list">
+          {course.lessons.map((lesson, index) => {
+            const isCompleted = completedLessons.includes(lesson.id);
+            return (
               <div
-                key={index}
-                className="resource-card"
-                onClick={() => handleExternalLink(resource.url)}
+                key={lesson.id}
+                className={`lesson-item ${isCompleted ? "completed" : ""} ${
+                  !enrolled ? "locked" : ""
+                }`}
+                onClick={() => enrolled && handleLessonClick(lesson.link)}
               >
-                <div className="resource-name">{resource.name}</div>
-                <div className="resource-description">{resource.description}</div>
-                <a
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="resource-link"
-                >
-                  Visit Resource →
-                </a>
+                {/* Checkbox to mark complete */}
+                {enrolled && (
+                  <div
+                    className="lesson-checkbox"
+                    onClick={(e) => handleMarkComplete(e, lesson.id)}
+                    title="Mark as complete"
+                  >
+                    {isCompleted && <span className="lesson-checkbox-icon">✓</span>}
+                  </div>
+                )}
+                
+                <div className="lesson-number">{index + 1}</div>
+                <div className="lesson-info">
+                  <h3>{lesson.title}</h3>
+                  <span className="lesson-duration">{lesson.duration}</span>
+                </div>
+                <div className="lesson-status">
+                  {isCompleted ? (
+                    <span className="completed-icon">✓</span>
+                  ) : !enrolled ? (
+                    <span className="lock-icon">🔒</span>
+                  ) : (
+                    <span className="start-icon">▶</span>
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </section>
-
-      {/* Enrollment Modal */}
-      {showEnrollModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <span
-                className="close-modal"
-                onClick={() => setShowEnrollModal(false)}
-              >
-                &times;
-              </span>
-            </div>
-            <h2 className="modal-title">Ready to Start Learning?</h2>
-            <p className="modal-text">
-              Click on any lesson or resource link to begin your learning journey
-              with these trusted platforms!
-            </p>
-            <button
-              className="modal-button"
-              onClick={() => setShowEnrollModal(false)}
-            >
-              Got it!
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

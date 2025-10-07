@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
+
 const Navbar = () => {
   // const [user, setUser] = useState({ name: 'John Doe' });
-
   // const logout = () => {
   //   setUser(null);
   // };
@@ -30,20 +30,20 @@ const Navbar = () => {
           </>
         )}
       </div> */}
-              <div className="nav-container">
-                <Link to="/" className="logo">MitrEdu</Link>
-                <nav>
-                  <ul className="nav-links">
-                    <li><Link to="/courses">Courses</Link></li>
-                    <li><Link to="/dashboard">Dashboard</Link></li>
-                    <li><Link to="/quiz">Quiz</Link></li>
-                  </ul>
-                </nav>
-                <div className="auth-buttons">
-                  <Link to="/login" className="btn btn-login">Login</Link>
-                  <Link to="/register" className="btn btn-signup">Sign Up</Link>
-                </div>
-              </div>
+      <div className="nav-container">
+        <Link to="/" className="logo">MitrEdu</Link>
+        <nav>
+          <ul className="nav-links">
+            <li><Link to="/courses">Courses</Link></li>
+            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="/quiz">Quiz</Link></li>
+          </ul>
+        </nav>
+        <div className="auth-buttons">
+          <Link to="/login" className="btn btn-login">Login</Link>
+          <Link to="/signup" className="btn btn-signup">Sign Up</Link>
+        </div>
+      </div>
     </nav>
   );
 };

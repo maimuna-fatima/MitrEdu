@@ -1,0 +1,573 @@
+/* Dashboard.css - Matching your site's yellow/cream theme */
+.dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #fff8e1, #ffe082, #fff8e1);
+  padding: 2rem;
+  font-family: "Georgia", serif;
+  transition: opacity 1s ease;
+  opacity: 0;
+}
+
+.dashboard-page.loaded {
+  opacity: 1;
+}
+
+/* Loading State */
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: #374151;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(55, 65, 81, 0.3);
+  border-top: 4px solid #f43f5e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header with Profile Button */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: #fff7ed;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.4s ease;
+}
+
+.dashboard-header:hover {
+  border-color: #f43f5e;
+}
+
+.welcome-section h1 {
+  font-size: 2.5rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-section h1 span {
+  color: #f43f5e;
+}
+
+.welcome-section p {
+  font-size: 1.1rem;
+  color: #047857;
+}
+
+/* Profile Button */
+.profile-button {
+  position: relative;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #fef3c7;
+  border: 2px solid #fcd34d;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-trigger:hover {
+  border-color: #f43f5e;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+}
+
+.profile-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: white;
+  font-weight: bold;
+}
+
+.profile-info-inline {
+  text-align: left;
+}
+
+.profile-info-inline h3 {
+  margin: 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.profile-info-inline p {
+  margin: 0;
+  color: #047857;
+  font-size: 0.85rem;
+}
+
+/* Profile Dropdown */
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: #fff7ed;
+  border: 2px solid #fcd34d;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  min-width: 280px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-dropdown-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profile-detail {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #fcd34d;
+}
+
+.profile-detail:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.profile-detail label {
+  display: block;
+  font-size: 0.85rem;
+  color: #047857;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.profile-detail p {
+  margin: 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #fff7ed;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.4s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-6px);
+  border-color: #f43f5e;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  border-radius: 1rem;
+}
+
+.stat-content h3 {
+  font-size: 2.5rem;
+  margin: 0;
+  color: #374151;
+}
+
+.stat-content p {
+  margin: 0;
+  color: #047857;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Dashboard Sections */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.dashboard-section {
+  background: #fff7ed;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.4s ease;
+}
+
+.dashboard-section:hover {
+  border-color: #fcd34d;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #fcd34d;
+}
+
+.section-header h2 {
+  font-size: 2rem;
+  color: #374151;
+  margin: 0;
+}
+
+.view-all-btn {
+  background: transparent;
+  color: #f43f5e;
+  border: 2px solid #f43f5e;
+  padding: 0.75rem 1.5rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.view-all-btn:hover {
+  background: #f43f5e;
+  color: #fff7ed;
+}
+
+/* Courses List */
+.courses-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.dashboard-course-card {
+  border: 2px solid #fcd34d;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  background: white;
+}
+
+.dashboard-course-card:hover {
+  transform: translateY(-6px);
+  border-color: #f43f5e;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-course-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.course-info {
+  padding: 1.5rem;
+}
+
+.course-info h3 {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.course-category {
+  color: #f43f5e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+/* Progress Bar */
+.progress-container {
+  margin: 1rem 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #fef3c7;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  border: 1px solid #fcd34d;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%);
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #047857;
+  font-weight: 600;
+}
+
+.started-date {
+  font-size: 0.85rem;
+  color: #047857;
+  margin: 0.5rem 0 0 0;
+}
+
+.continue-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #f43f5e;
+  color: #fff7ed;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.continue-btn:hover {
+  background: #e11d48;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Quiz Section */
+.quiz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quiz-card {
+  padding: 1.5rem;
+  border: 2px solid #fcd34d;
+  border-radius: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.quiz-card:hover {
+  border-color: #f43f5e;
+  transform: translateX(5px);
+}
+
+.quiz-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+  font-size: 1.1rem;
+}
+
+.quiz-meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #047857;
+}
+
+.quiz-score {
+  text-align: center;
+}
+
+.score-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.score-value {
+  color: white;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.score-label {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #047857;
+  font-weight: bold;
+}
+
+.quiz-date {
+  font-size: 0.85rem;
+  color: #047857;
+  margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #047857;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  color: #374151;
+}
+
+.primary-btn {
+  background: #f43f5e;
+  color: #fff7ed;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+  background: #e11d48;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .welcome-section h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 1rem;
+  }
+
+  .dashboard-header {
+    padding: 1.5rem;
+  }
+
+  .welcome-section h1 {
+    font-size: 1.8rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .courses-list {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .profile-dropdown {
+    right: auto;
+    left: 0;
+  }
+}
+/* Add these styles to your existing Dashboard.css file */
+
+/* Profile Section with Logout Button */
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logout-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .profile-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .logout-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}

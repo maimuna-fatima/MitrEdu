@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../AuthContext';
+import { saveQuizAttempt } from './firestoreUtils';
 import './Quiz.css';
+
 const QUIZ_DATA = {
   'html-css-js': {
     title: 'HTML, CSS & JavaScript Quiz',
@@ -408,9 +411,11 @@ const QUIZ_DATA = {
 };
 
 const Quiz = () => {
+  const { user } = useAuth(); // Get authenticated user
   const [isLoaded, setIsLoaded] = useState(false);
   const [filterCategory, setFilterCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [saving, setSaving] = useState(false);
 
   // Quiz taking states
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -456,10 +461,7 @@ const Quiz = () => {
       }, 1000);
     } else if (timeLeft === 0 && currentQuiz && !quizCompleted) {
       // Auto-submit when time runs out
-      const finalScore = calculateScore();
-      setScore(finalScore);
-      setQuizCompleted(true);
-      setShowResults(true);
+      handleSubmitQuiz();
     }
 
     return () => {
@@ -474,9 +476,7 @@ const Quiz = () => {
   };
 
   const startQuiz = (courseKey) => {
-    console.log('Starting quiz with courseKey:', courseKey);
     const quiz = QUIZ_DATA[courseKey];
-    console.log('Quiz data:', quiz);
 
     if (!quiz) {
       console.error('Quiz not found for key:', courseKey);
@@ -492,8 +492,6 @@ const Quiz = () => {
     setQuizCompleted(false);
     setShowResults(false);
     setScore(0);
-
-    console.log('Quiz started successfully');
   };
 
   const handleAnswerSelect = (questionId, answer) => {
@@ -523,15 +521,34 @@ const Quiz = () => {
     return correct;
   };
 
-  const handleSubmitQuiz = () => {
-    if (!currentQuiz) return;
+  const handleSubmitQuiz = async () => {
+    if (!currentQuiz || !user) return;
 
     setConfirmedAnswers(prev => new Set([...prev, currentQuiz.questions[currentQuestion].id]));
 
-    const finalScore = calculateScore();
-    setScore(finalScore);
+    const correctAnswers = calculateScore();
+    const totalQuestions = currentQuiz.questions.length;
+    const percentageScore = Math.round((correctAnswers / totalQuestions) * 100);
+
+    setScore(correctAnswers);
     setQuizCompleted(true);
     setShowResults(true);
+
+    // Save quiz attempt to Firebase
+    setSaving(true);
+    try {
+      await saveQuizAttempt(user.uid, selectedCourse, {
+        score: percentageScore,
+        totalQuestions: totalQuestions,
+        answers: userAnswers
+      });
+      console.log('Quiz attempt saved to Firebase successfully!');
+    } catch (error) {
+      console.error('Failed to save quiz attempt:', error);
+      // Still show results even if saving fails
+    } finally {
+      setSaving(false);
+    }
   };
 
   const previousQuestion = () => {
@@ -638,6 +655,7 @@ const Quiz = () => {
           <div className="results-header">
             <h1 className={passed ? 'results-pass' : 'results-fail'}>Quiz Results</h1><br />
             <h2>{currentQuiz.title}</h2>
+            {saving && <p className="saving-indicator">Saving results...</p>}
           </div>
 
           <div className={`results-summary ${passed ? 'pass' : 'fail'}`}>
@@ -745,7 +763,9 @@ const Quiz = () => {
           <button className="btn btn-prev" onClick={previousQuestion} disabled={currentQuestion === 0}>Previous</button>
           <span>{currentQuestion + 1} / {currentQuiz.questions.length}</span>
           {currentQuestion === currentQuiz.questions.length - 1 ? (
-            <button className="btn btn-submit" onClick={handleSubmitQuiz}>Submit Quiz</button>
+            <button className="btn btn-submit" onClick={handleSubmitQuiz} disabled={saving}>
+              {saving ? 'Submitting...' : 'Submit Quiz'}
+            </button>
           ) : (
             <button className="btn btn-next" onClick={nextQuestion}>Next</button>
           )}
@@ -775,4 +795,5 @@ const Quiz = () => {
     </div>
   );
 };
+
 export default Quiz;
