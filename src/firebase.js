@@ -1,4 +1,4 @@
-// firebase.js - REPLACE YOUR EXISTING FILE WITH THIS
+// firebase.js 
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
