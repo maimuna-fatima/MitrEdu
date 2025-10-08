@@ -293,48 +293,48 @@ const Dashboard = () => {
           )}
         </section>
 
-        {/* Quiz Results */}
-        <section className="dashboard-section quiz-section">
-          <div className="section-header">
-            <h2>Recent Quiz Results</h2>
-          </div>
+        // {/* Quiz Results */}
+        // <section className="dashboard-section quiz-section">
+        //   <div className="section-header">
+        //     <h2>Recent Quiz Results</h2>
+        //   </div>
 
-          {dashboardData?.quizAttempts?.length === 0 ? (
-            <div className="empty-state">
-              <p>No quiz attempts yet.</p>
-              <button onClick={() => navigate("/quiz")} className="primary-btn">
-                Take a Quiz
-              </button>
-            </div>
-          ) : (
-            <div className="quiz-list">
-              {dashboardData?.quizAttempts?.slice(0, 5).map((quiz) => (
-                <div key={quiz.quizId} className="quiz-card">
-                  <div className="quiz-info">
-                    <h4>{quiz.quizId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h4>
-                    <p className="quiz-meta">
-                      {quiz.totalAttempts} attempt{quiz.totalAttempts !== 1 ? "s" : ""}
-                    </p>
-                  </div>
-                  <div className="quiz-score">
-                    <div className="score-circle">
-                      <span className="score-value">{quiz.bestScore}%</span>
-                    </div>
-                    <p className="score-label">Best Score</p>
-                  </div>
-                  {quiz.lastAttemptDate && (
-                    <p className="quiz-date">
-                      Last attempt:{" "}
-                      {new Date(
-                        quiz.lastAttemptDate.seconds * 1000
-                      ).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        //   {dashboardData?.quizAttempts?.length === 0 ? (
+        //     <div className="empty-state">
+        //       <p>No quiz attempts yet.</p>
+        //       <button onClick={() => navigate("/quiz")} className="primary-btn">
+        //         Take a Quiz
+        //       </button>
+        //     </div>
+        //   ) : (
+        //     <div className="quiz-list">
+        //       {dashboardData?.quizAttempts?.slice(0, 5).map((quiz) => (
+        //         <div key={quiz.quizId} className="quiz-card">
+        //           <div className="quiz-info">
+        //             <h4>{quiz.quizId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h4>
+        //             <p className="quiz-meta">
+        //               {quiz.totalAttempts} attempt{quiz.totalAttempts !== 1 ? "s" : ""}
+        //             </p>
+        //           </div>
+        //           <div className="quiz-score">
+        //             <div className="score-circle">
+        //               <span className="score-value">{quiz.bestScore}%</span>
+        //             </div>
+        //             <p className="score-label">Best Score</p>
+        //           </div>
+        //           {quiz.lastAttemptDate && (
+        //             <p className="quiz-date">
+        //               Last attempt:{" "}
+        //               {new Date(
+        //                 quiz.lastAttemptDate.seconds * 1000
+        //               ).toLocaleDateString()}
+        //             </p>
+        //           )}
+        //         </div>
+        //       ))}
+        //     </div>
+        //   )}
+        // </section>
       </div>
     </div>
   );
