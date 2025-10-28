@@ -121,7 +121,7 @@ const PublicCourses = () => {
 
       {/* Available Courses Section */}
       <section className="available-courses-section">
-        <h2 className="section-title">Available Courses</h2>
+        {/* <h2 className="section-title">Available Courses</h2> */}
         
         <div className="courses-container">
           {filteredCourses.length === 0 ? (

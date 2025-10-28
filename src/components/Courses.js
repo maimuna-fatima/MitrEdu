@@ -199,7 +199,7 @@ const Courses = () => {
 
       {/* MY COURSES SECTION */}
       <section className="my-courses-section">
-        <h2 className="section-title">My Courses</h2>
+        {/* <h2 className="section-title">My Courses</h2> */}
         
         {loading ? (
           <div style={{ textAlign: 'center', padding: '2rem', color: 'white' }}>

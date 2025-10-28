@@ -1,4 +1,3 @@
-// Dashboard.js - Updated with proper auth check and visible logout
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
@@ -13,10 +12,10 @@ const Dashboard = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const navigate = useNavigate();
 
-  // CRITICAL: Check if user is authenticated
+  // Check authentication
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
   }, [user, navigate]);
@@ -24,13 +23,13 @@ const Dashboard = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
-  // All available courses
+  // Sample course data
   const allCourses = [
     {
       id: 1,
@@ -66,7 +65,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     setIsLoaded(true);
-    
+
     const fetchDashboardData = async () => {
       if (user) {
         try {
@@ -77,7 +76,7 @@ const Dashboard = () => {
           setDashboardData({
             userProfile: null,
             coursesWithProgress: [],
-            quizAttempts: []
+            quizAttempts: [],
           });
         } finally {
           setLoading(false);
@@ -107,40 +106,40 @@ const Dashboard = () => {
     );
   }
 
-  // Get enrolled courses with their details
   const enrolledCoursesWithDetails = (dashboardData.coursesWithProgress || [])
     .map(({ courseId, progress }) => {
-      const course = allCourses.find(c => c.id === courseId);
+      const course = allCourses.find((c) => c.id === courseId);
       return course ? { ...course, progress } : null;
     })
     .filter(Boolean);
 
-  // Calculate statistics
   const totalCourses = enrolledCoursesWithDetails.length;
   const completedCourses = enrolledCoursesWithDetails.filter(
-    c => c.progress?.percentComplete === 100
+    (c) => c.progress?.percentComplete === 100
   ).length;
-  const averageProgress = totalCourses > 0
-    ? Math.round(
-        enrolledCoursesWithDetails.reduce(
-          (sum, c) => sum + (c.progress?.percentComplete || 0),
-          0
-        ) / totalCourses
-      )
-    : 0;
+  const averageProgress =
+    totalCourses > 0
+      ? Math.round(
+          enrolledCoursesWithDetails.reduce(
+            (sum, c) => sum + (c.progress?.percentComplete || 0),
+            0
+          ) / totalCourses
+        )
+      : 0;
 
   const totalQuizzes = dashboardData?.quizAttempts?.length || 0;
-  const averageQuizScore = totalQuizzes > 0
-    ? Math.round(
-        dashboardData.quizAttempts.reduce(
-          (sum, quiz) => sum + (quiz.bestScore || 0),
-          0
-        ) / totalQuizzes
-      )
-    : 0;
+  const averageQuizScore =
+    totalQuizzes > 0
+      ? Math.round(
+          dashboardData.quizAttempts.reduce(
+            (sum, quiz) => sum + (quiz.bestScore || 0),
+            0
+          ) / totalQuizzes
+        )
+      : 0;
 
   return (
-    <div className={`dashboard-page ${isLoaded ? 'loaded' : ''}`}>
+    <div className={`dashboard-page ${isLoaded ? "loaded" : ""}`}>
       {/* Header with Profile Button and Logout */}
       <section className="dashboard-header">
         <div className="welcome-section">
@@ -152,7 +151,7 @@ const Dashboard = () => {
 
         <div className="profile-section">
           <div className="profile-button">
-            <div 
+            <div
               className="profile-trigger"
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
             >
@@ -191,7 +190,6 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Visible Logout Button */}
           <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>
@@ -233,7 +231,7 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* Main Content */}
+      {/* Main Dashboard Sections */}
       <div className="dashboard-grid">
         {/* Enrolled Courses */}
         <section className="dashboard-section courses-section">
@@ -293,48 +291,45 @@ const Dashboard = () => {
           )}
         </section>
 
-        // {/* Quiz Results */}
-        // <section className="dashboard-section quiz-section">
-        //   <div className="section-header">
-        //     <h2>Recent Quiz Results</h2>
-        //   </div>
-
-        //   {dashboardData?.quizAttempts?.length === 0 ? (
-        //     <div className="empty-state">
-        //       <p>No quiz attempts yet.</p>
-        //       <button onClick={() => navigate("/quiz")} className="primary-btn">
-        //         Take a Quiz
-        //       </button>
-        //     </div>
-        //   ) : (
-        //     <div className="quiz-list">
-        //       {dashboardData?.quizAttempts?.slice(0, 5).map((quiz) => (
-        //         <div key={quiz.quizId} className="quiz-card">
-        //           <div className="quiz-info">
-        //             <h4>{quiz.quizId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h4>
-        //             <p className="quiz-meta">
-        //               {quiz.totalAttempts} attempt{quiz.totalAttempts !== 1 ? "s" : ""}
-        //             </p>
-        //           </div>
-        //           <div className="quiz-score">
-        //             <div className="score-circle">
-        //               <span className="score-value">{quiz.bestScore}%</span>
-        //             </div>
-        //             <p className="score-label">Best Score</p>
-        //           </div>
-        //           {quiz.lastAttemptDate && (
-        //             <p className="quiz-date">
-        //               Last attempt:{" "}
-        //               {new Date(
-        //                 quiz.lastAttemptDate.seconds * 1000
-        //               ).toLocaleDateString()}
-        //             </p>
-        //           )}
-        //         </div>
-        //       ))}
-        //     </div>
-        //   )}
-        // </section>
+        {/* QUIZ RESULTS SECTION (currently hidden)
+        <section className="dashboard-section quiz-section">
+          <div className="section-header">
+            <h2>Recent Quiz Results</h2>
+          </div>
+          {dashboardData?.quizAttempts?.length === 0 ? (
+            <div className="empty-state">
+              <p>No quiz attempts yet.</p>
+              <button onClick={() => navigate("/quiz")} className="primary-btn">
+                Take a Quiz
+              </button>
+            </div>
+          ) : (
+            <div className="quiz-list">
+              {dashboardData.quizAttempts.slice(0, 5).map((quiz) => (
+                <div key={quiz.quizId} className="quiz-card">
+                  <div className="quiz-info">
+                    <h4>{quiz.quizId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h4>
+                    <p className="quiz-meta">
+                      {quiz.totalAttempts} attempt{quiz.totalAttempts !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <div className="quiz-score">
+                    <div className="score-circle">
+                      <span className="score-value">{quiz.bestScore}%</span>
+                    </div>
+                    <p className="score-label">Best Score</p>
+                  </div>
+                  {quiz.lastAttemptDate && (
+                    <p className="quiz-date">
+                      Last attempt:{" "}
+                      {new Date(quiz.lastAttemptDate.seconds * 1000).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section> */}
       </div>
     </div>
   );

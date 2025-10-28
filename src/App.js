@@ -18,6 +18,9 @@ import CourseDetails from "./components/CourseDetails";
 import Login from './components/Login';
 import Signup from './components/Signup';
 
+// ✅ Added Import
+import ScorePredictor from "./components/ScorePredictor";
+
 // Import Firebase for console access
 import { auth } from './firebase';
 import { enrollInCourse, getUserProfile, getEnrolledCoursesWithProgress } from './components/firestoreUtils';
@@ -121,6 +124,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          {/* ✅ Added New Route for Score Predictor */}
+          <Route path="/score-predictor" element={<ScorePredictor />} />
          
           {/* Conditional Routes - Public or Private based on auth */}
           <Route
